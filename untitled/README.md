@@ -1,1 +1,0 @@
-Tobiáš Seknička

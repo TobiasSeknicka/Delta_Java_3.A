@@ -1,5 +1,7 @@
 import accounts.*;
-import people.AccountOwner;
+import creditCards.CreditCard;
+import people.Owner;
+import transfers.TransferService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        AccountOwner owner = new AccountOwner("Tobias", "Seknicka");
+        TransferService transferService = new TransferService();
+
+        Owner owner = new Owner("Tobias", "Seknicka");
 
         List<BankAccount> accounts = new ArrayList<>();
 
@@ -21,36 +25,62 @@ public class Main {
         accounts.add(studentAccount);
 
         BankAccount savingAccount = new SavingAccount(owner, 100);
+        accounts.add(savingAccount);
 
-        BankAccount businessAccount = new BusinessAccount(owner, 100);
+        BankAccount businessAccount = new BusinessAccount(owner, 1000);
+        accounts.add(businessAccount);
 
         for (BankAccount account : accounts) {
+            if (account instanceof InterestPoint) {
+                ((InterestPoint) account).calculateInterest();
+            }
+        }
 
+        for (BankAccount account : accounts) {
             if (account instanceof StudentAccount) {
-
                 StudentAccount overrideAccount = (StudentAccount) account;
                 System.out.println("school: " + overrideAccount.getSchool());
             }
         }
 
-        businessAccount.sub(50);
+        transferService.withdraw(businessAccount, 50);
+        transferService.addToBalance(savingAccount, 1000);
 
-        savingAccount.add(1000);
+        transferService.addToBalance(bankAccount, 500);
+        transferService.withdraw(bankAccount, 500);
 
-        bankAccount.add(500);
-        bankAccount.add(300);
-        bankAccount.add(100);
+        transferService.withdraw(studentAccount, 5000);
 
-        bankAccount.sub(500);
-        bankAccount.sub(500);
-        bankAccount.sub(500);
+        CreditCard creditCard = new CreditCard(owner, 500);
+        transferService.addToBalance(creditCard, 1000);
+        transferService.withdraw(creditCard, 100);
 
-        studentAccount.sub(5500);
-        studentAccount.sub(200);
+        // Ukol do 1. 10. - prevody mezi ucty
+        transferService.transfer(bankAccount, savingAccount, 300);
+        transferService.transfer(businessAccount, bankAccount, 100); // poplatek 0,3 % = 0.3
 
+        try {
+            transferService.transfer(bankAccount, bankAccount, 100);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
+        try {
+            transferService.transfer(bankAccount, savingAccount, -50);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
+        try {
+            transferService.transfer(bankAccount, savingAccount, 1000000);
+        } catch (RuntimeException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
 
-        System.out.println("balance: " + bankAccount.getBalance());
+        System.out.println("current balance: " + bankAccount.getBalance());
+        System.out.println("saving balance: " + savingAccount.getBalance());
+        System.out.println("business balance: " + businessAccount.getBalance());
+        System.out.println("student balance: " + studentAccount.getBalance());
+        System.out.println("credit card balance: " + creditCard.getBalance());
     }
 }

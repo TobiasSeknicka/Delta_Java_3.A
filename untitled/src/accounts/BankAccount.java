@@ -1,51 +1,50 @@
 package accounts;
 
-import people.AccountOwner;
+import notifiers.EmailNotifier;
+import notifiers.Notifier;
+import people.Owner;
+import transfers.Withdraw;
 
-public abstract class BankAccount {
+public abstract class BankAccount implements Withdraw {
 
     private String uuid;
 
     private String accountNumber; // 2102405518
 
-    private AccountOwner owner;
+    private Owner owner;
 
-    private double balance;
+    protected double balance;
 
-    public BankAccount(AccountOwner owner) {
+    protected Notifier notifier = new EmailNotifier();
+
+    public BankAccount(String uuid, String accountNumber, Owner owner) {
+        this.uuid = uuid;
+        this.accountNumber = accountNumber;
         this.owner = owner;
         this.balance = 0;
     }
 
-    public BankAccount(AccountOwner owner, double balance) {
+    public BankAccount(Owner owner) {
+        this.owner = owner;
+        this.balance = 0;
+    }
+
+    public BankAccount(Owner owner, double balance) {
         this.owner = owner;
         this.balance = balance;
     }
 
+    public Owner getOwner() {
+        return owner;
+    }
+
+    @Override
     public double getBalance() {
         return balance;
     }
 
-    public void sub(double amount) {
-        System.out.println("Sub amount is " + amount);
-
-        double newBalance = balance - amount;
-
-        if (newBalance < 0) {
-            throw new RuntimeException("Balance is negative");
-        }
-
-        this.balance = newBalance;
-    }
-
-    public void setBalance(double balance){
+    @Override
+    public void setNewBalance(double balance) {
         this.balance = balance;
     }
-
-    public void add(double amount) {
-        System.out.println("Add amount is " + amount);
-
-        this.balance = this.balance + amount;
-    }
 }
-

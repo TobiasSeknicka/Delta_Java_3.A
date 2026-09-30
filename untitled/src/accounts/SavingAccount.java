@@ -1,21 +1,27 @@
 package accounts;
 
-import people.AccountOwner;
+import people.Owner;
 
-public class SavingAccount extends BankAccount{
+public class SavingAccount extends BankAccount implements InterestPoint {
 
-    public SavingAccount(AccountOwner owner) {
+    private static final double INTEREST = 0.005; // 0,5 %
+
+    public SavingAccount(String uuid, String accountNumber, Owner owner) {
+        super(uuid, accountNumber, owner);
+    }
+
+    public SavingAccount(Owner owner) {
         super(owner);
     }
 
-    public SavingAccount(AccountOwner owner, double balance) {
-
+    public SavingAccount(Owner owner, double balance) {
         super(owner, balance);
     }
 
     @Override
-    public void add(double amount) {
-        System.out.println("Add amount is " + (amount+(amount*0.005)));
+    public void calculateInterest() {
+        double interest = this.balance * INTEREST;
 
-        super.add(amount+(amount*0.005));
-    }}
+        this.setNewBalance(this.getBalance() + interest);
+    }
+}

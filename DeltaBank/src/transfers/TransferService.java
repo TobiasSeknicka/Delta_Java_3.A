@@ -1,6 +1,5 @@
 package transfers;
 
-import accounts.BankAccount;
 import accounts.BusinessAccount;
 import accounts.SavingAccount;
 import accounts.StudentAccount;
@@ -10,7 +9,6 @@ import notifiers.Notifier;
 public class TransferService {
 
     private static final double BUSINESS_ACCOUNT_SUB_FEE = 0.01;       // 1 % z kazdeho vyberu
-    private static final double BUSINESS_ACCOUNT_TRANSFER_FEE = 0.003; // 0,3 % z prevadene castky
     private static final double SAVING_ACCOUNT_ADD_BONUS = 0.005;      // 0,5 % pri vkladu
     private static final double STUDENT_ACCOUNT_LIMIT = -5000;
 
@@ -46,32 +44,6 @@ public class TransferService {
         this.notifier.notify("Add amount is " + amount);
 
         withdrawObject.setNewBalance(withdrawObject.getBalance() + amount);
-    }
-
-    public void transfer(BankAccount from, BankAccount to, double amount) {
-        if (from == null || to == null) {
-            throw new IllegalArgumentException("Source and target account must not be null");
-        }
-        if (from == to) {
-            throw new IllegalArgumentException("Cannot transfer to the same account");
-        }
-        this.validateAmount(amount);
-
-        double fee = 0;
-        if (from instanceof BusinessAccount) {
-            fee = amount * BUSINESS_ACCOUNT_TRANSFER_FEE;
-        }
-
-        double newFromBalance = from.getBalance() - amount - fee;
-
-        if (newFromBalance < this.getWithdrawLimit(from)) {
-            throw new RuntimeException("Insufficient funds for transfer");
-        }
-
-        from.setNewBalance(newFromBalance);
-        to.setNewBalance(to.getBalance() + amount);
-
-        this.notifier.notify("Transferred " + amount + " (fee " + fee + ")");
     }
 
     private void validateObject(Withdraw withdrawObject) {

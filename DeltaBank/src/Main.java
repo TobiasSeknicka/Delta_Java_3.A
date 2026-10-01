@@ -1,6 +1,7 @@
 import accounts.*;
 import creditCards.CreditCard;
 import people.Owner;
+import transfers.AccountTransferService;
 import transfers.TransferService;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class Main {
     public static void main(String[] args) {
 
         TransferService transferService = new TransferService();
+        AccountTransferService accountTransferService = new AccountTransferService();
 
         Owner owner = new Owner("Tobias", "Seknicka");
 
@@ -55,24 +57,23 @@ public class Main {
         transferService.addToBalance(creditCard, 1000);
         transferService.withdraw(creditCard, 100);
 
-        // Ukol do 1. 10. - prevody mezi ucty
-        transferService.transfer(bankAccount, savingAccount, 300);
-        transferService.transfer(businessAccount, bankAccount, 100); // poplatek 0,3 % = 0.3
+        accountTransferService.transfer(bankAccount, savingAccount, 300);
+        accountTransferService.transfer(businessAccount, bankAccount, 100);
 
         try {
-            transferService.transfer(bankAccount, bankAccount, 100);
+            accountTransferService.transfer(bankAccount, bankAccount, 100);
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
 
         try {
-            transferService.transfer(bankAccount, savingAccount, -50);
+            accountTransferService.transfer(bankAccount, savingAccount, -50);
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
 
         try {
-            transferService.transfer(bankAccount, savingAccount, 1000000);
+            accountTransferService.transfer(bankAccount, savingAccount, 1000000);
         } catch (RuntimeException e) {
             System.out.println("Error: " + e.getMessage());
         }

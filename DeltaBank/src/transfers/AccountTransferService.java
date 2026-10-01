@@ -2,13 +2,16 @@ package transfers;
 
 import accounts.BankAccount;
 import accounts.BusinessAccount;
-import accounts.StudentAccount;
 import notifiers.ConsoleNotifier;
 import notifiers.Notifier;
 
 public class AccountTransferService {
 
+    private static final double BUSINESS_ACCOUNT_TRANSFER_FEE = 0.003;
+
     Notifier notifier = new ConsoleNotifier();
+
+    TransferService transferService = new TransferService();
 
     public void transfer(BankAccount from, BankAccount to, double amount) {
         if (from == null || to == null) {
@@ -26,18 +29,12 @@ public class AccountTransferService {
         double fee = 0;
 
         if (from instanceof BusinessAccount) {
-            fee = amount * 0.003;
+            fee = amount * BUSINESS_ACCOUNT_TRANSFER_FEE;
         }
 
         double newBalance = from.getBalance() - amount - fee;
 
-        double limit = 0;
-
-        if (from instanceof StudentAccount) {
-            limit = -5000;
-        }
-
-        if (newBalance < limit) {
+        if (newBalance < transferService.getWithdrawLimit(from)) {
             throw new RuntimeException("Not enough money");
         }
 

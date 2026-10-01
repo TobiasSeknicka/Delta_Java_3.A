@@ -58,7 +58,7 @@ public class TransferService {
         }
     }
 
-    private double getWithdrawLimit(Withdraw withdrawObject) {
+    public double getWithdrawLimit(Withdraw withdrawObject) {
 
         if (withdrawObject instanceof StudentAccount) {
             return STUDENT_ACCOUNT_LIMIT;

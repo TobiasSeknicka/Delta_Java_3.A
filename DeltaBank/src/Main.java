@@ -1,5 +1,6 @@
 import accounts.*;
 import creditCards.CreditCard;
+import factories.*;
 import people.Owner;
 import transfers.AccountTransferService;
 import transfers.TransferService;
@@ -16,20 +17,26 @@ public class Main {
         TransferService transferService = new TransferService();
         AccountTransferService accountTransferService = new AccountTransferService();
 
-        Owner owner = new Owner("Tobias", "Seknicka");
-
         List<BankAccount> accounts = new ArrayList<>();
 
-        BankAccount bankAccount = new CurrentAccount(owner, 2000);
+        OwnerFactory ownerFactory = new OwnerFactory();
+        CurrentAccountFactory currentAccountFactory = new CurrentAccountFactory();
+        StudentAccountFactory studentAccountFactory = new StudentAccountFactory();
+        SavingAccountFactory savingAccountFactory = new SavingAccountFactory();
+        BusinessAccountFactory businessAccountFactory = new BusinessAccountFactory();
+        CreditCardFactory creditCardFactory = new CreditCardFactory();
+
+        Owner owner = ownerFactory.createOwner("Tobias", "Seknicka");
+
+        BankAccount bankAccount = currentAccountFactory.createAccount(owner, 2000);
+        BankAccount studentAccount = studentAccountFactory.createAccount(owner, 100);
+        BankAccount savingAccount = savingAccountFactory.createAccount(owner, 100);
+        BankAccount businessAccount = businessAccountFactory.createAccount(owner, 1000);
+        CreditCard creditCard = creditCardFactory.createCreditCard(owner, 500);
+
         accounts.add(bankAccount);
-
-        BankAccount studentAccount = new StudentAccount(owner, 100);
         accounts.add(studentAccount);
-
-        BankAccount savingAccount = new SavingAccount(owner, 100);
         accounts.add(savingAccount);
-
-        BankAccount businessAccount = new BusinessAccount(owner, 1000);
         accounts.add(businessAccount);
 
         for (BankAccount account : accounts) {
@@ -53,7 +60,6 @@ public class Main {
 
         transferService.withdraw(studentAccount, 5000);
 
-        CreditCard creditCard = new CreditCard(owner, 500);
         transferService.addToBalance(creditCard, 1000);
         transferService.withdraw(creditCard, 100);
 
@@ -83,5 +89,10 @@ public class Main {
         System.out.println("business balance: " + businessAccount.getBalance());
         System.out.println("student balance: " + studentAccount.getBalance());
         System.out.println("credit card balance: " + creditCard.getBalance());
+
+        System.out.println("current number: " + bankAccount.getAccountNumber());
+        System.out.println("student number: " + studentAccount.getAccountNumber());
+        System.out.println("saving number: " + savingAccount.getAccountNumber());
+        System.out.println("business number: " + businessAccount.getAccountNumber());
     }
 }

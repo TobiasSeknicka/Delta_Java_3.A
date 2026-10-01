@@ -38,6 +38,14 @@ public abstract class BankAccount implements Withdraw {
         return owner;
     }
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
     @Override
     public double getBalance() {
         return balance;

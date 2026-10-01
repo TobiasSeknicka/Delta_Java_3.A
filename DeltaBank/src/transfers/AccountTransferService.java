@@ -8,9 +8,6 @@ import notifiers.Notifier;
 
 public class AccountTransferService {
 
-    private static final double BUSINESS_ACCOUNT_TRANSFER_FEE = 0.003;
-    private static final double STUDENT_ACCOUNT_LIMIT = -5000;
-
     Notifier notifier = new ConsoleNotifier();
 
     public void transfer(BankAccount from, BankAccount to, double amount) {
@@ -22,34 +19,31 @@ public class AccountTransferService {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
 
-        if (Double.isNaN(amount) || Double.isInfinite(amount) || amount <= 0) {
-            throw new IllegalArgumentException("Amount must be a positive number");
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
         }
 
         double fee = 0;
 
         if (from instanceof BusinessAccount) {
-            fee = amount * BUSINESS_ACCOUNT_TRANSFER_FEE;
+            fee = amount * 0.003;
         }
 
-        double newFromBalance = from.getBalance() - amount - fee;
+        double newBalance = from.getBalance() - amount - fee;
 
-        if (newFromBalance < this.getLimit(from)) {
-            throw new RuntimeException("Insufficient funds for transfer");
+        double limit = 0;
+
+        if (from instanceof StudentAccount) {
+            limit = -5000;
         }
 
-        from.setNewBalance(newFromBalance);
+        if (newBalance < limit) {
+            throw new RuntimeException("Not enough money");
+        }
+
+        from.setNewBalance(newBalance);
         to.setNewBalance(to.getBalance() + amount);
 
-        this.notifier.notify("Transferred " + amount + " (fee " + fee + ")");
-    }
-
-    private double getLimit(BankAccount account) {
-
-        if (account instanceof StudentAccount) {
-            return STUDENT_ACCOUNT_LIMIT;
-        }
-
-        return 0;
+        this.notifier.notify("Transferred " + amount + ", fee " + fee);
     }
 }

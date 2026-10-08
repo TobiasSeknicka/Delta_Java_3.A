@@ -2,6 +2,7 @@ package transfers;
 
 import accounts.BankAccount;
 import accounts.BusinessAccount;
+import factories.TransactionFactory;
 import notifiers.ConsoleNotifier;
 import notifiers.Notifier;
 
@@ -11,7 +12,14 @@ public class AccountTransferService {
 
     Notifier notifier = new ConsoleNotifier();
 
-    TransferService transferService = new TransferService();
+    private TransferLoggerService logger;
+    private TransferService transferService;
+    private TransactionFactory transactionFactory = new TransactionFactory();
+
+    public AccountTransferService(TransferLoggerService logger) {
+        this.logger = logger;
+        this.transferService = new TransferService(logger);
+    }
 
     public void transfer(BankAccount from, BankAccount to, double amount) {
         if (from == null || to == null) {
@@ -42,5 +50,7 @@ public class AccountTransferService {
         to.setNewBalance(to.getBalance() + amount);
 
         this.notifier.notify("Transferred " + amount + ", fee " + fee);
+
+        logger.log(transactionFactory.createTransfer(from, to, amount, fee));
     }
 }

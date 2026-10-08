@@ -2,7 +2,9 @@ import accounts.*;
 import creditCards.CreditCard;
 import factories.*;
 import people.Owner;
+import transactions.Transaction;
 import transfers.AccountTransferService;
+import transfers.TransferLoggerService;
 import transfers.TransferService;
 
 import java.util.ArrayList;
@@ -14,8 +16,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TransferService transferService = new TransferService();
-        AccountTransferService accountTransferService = new AccountTransferService();
+        TransferLoggerService logger = new TransferLoggerService();
+
+        TransferService transferService = new TransferService(logger);
+        AccountTransferService accountTransferService = new AccountTransferService(logger);
 
         List<BankAccount> accounts = new ArrayList<>();
 
@@ -94,5 +98,13 @@ public class Main {
         System.out.println("student number: " + studentAccount.getAccountNumber());
         System.out.println("saving number: " + savingAccount.getAccountNumber());
         System.out.println("business number: " + businessAccount.getAccountNumber());
+
+        System.out.println("=== HISTORIE TRANSAKCI ===");
+        logger.printAll();
+
+        System.out.println("=== HISTORIE BEZNEHO UCTU ===");
+        for (Transaction t : logger.getByAccount(bankAccount.getAccountNumber())) {
+            System.out.println(t);
+        }
     }
 }

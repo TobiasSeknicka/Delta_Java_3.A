@@ -1,4 +1,5 @@
 import accounts.*;
+import accounts.serialization.*;
 import creditCards.CreditCard;
 import factories.*;
 import people.Owner;
@@ -106,5 +107,16 @@ public class Main {
         for (Transaction t : logger.getByAccount(bankAccount.getAccountNumber())) {
             System.out.println(t);
         }
+
+        List<BankAccountSerializationService> serializers = new ArrayList<>();
+        serializers.add(new BankAccountJsonSerializationService());
+        serializers.add(new BankAccountXmlSerializationService());
+
+        for (BankAccountSerializationService serializer : serializers) {
+            System.out.println("=== " + serializer.getClass().getSimpleName() + " ===");
+            System.out.println(serializer.serialize(bankAccount));
+            System.out.println(serializer.serializeAll(accounts));
+        }
+
     }
 }

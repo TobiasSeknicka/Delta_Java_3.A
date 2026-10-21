@@ -109,8 +109,8 @@ public class Main {
         }
 
         List<BankAccountSerializationService> serializers = new ArrayList<>();
-        serializers.add(new BankAccountJsonSerializationService());
-        serializers.add(new BankAccountXmlSerializationService());
+        serializers.add(new BankAccountGsonSerializationService());
+        serializers.add(new BankAccountJacksonXmlSerializationService());
 
         for (BankAccountSerializationService serializer : serializers) {
             System.out.println("=== " + serializer.getClass().getSimpleName() + " ===");

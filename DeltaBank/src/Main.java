@@ -7,6 +7,7 @@ import transactions.Transaction;
 import transfers.AccountTransferService;
 import transfers.TransferLoggerService;
 import transfers.TransferService;
+import factories.logging.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,25 @@ public class Main {
 
         Owner owner = ownerFactory.createOwner("Tobias", "Seknicka");
 
-        BankAccount bankAccount = currentAccountFactory.createAccount(owner, 2000);
+        /*BankAccount bankAccount = currentAccountFactory.createAccount(owner, 2000);
         BankAccount studentAccount = studentAccountFactory.createAccount(owner, 100);
-        BankAccount savingAccount = savingAccountFactory.createAccount(owner, 100);
+        BankAccount savingAccount = savingAccountFactory.createAccount(owner, 100);*/
+        //jen logovani
+        AccountCreator<StudentAccount> loggedStudentCreator =
+                new LoggingAccountCreator<>(studentAccountFactory::createAccount);
+
+        // jen cas
+        AccountCreator<SavingAccount> timedSavingCreator =
+                new TimedAccountCreator<>(savingAccountFactory::createAccount);
+
+        //kombinace (logovani obaluje cas)
+        AccountCreator<CurrentAccount> combinedCurrentCreator =
+                new LoggingAccountCreator<>(
+                        new TimedAccountCreator<>(currentAccountFactory::createAccount));
+
+        BankAccount studentAccount = loggedStudentCreator.createAccount(owner, 100);
+        BankAccount savingAccount = timedSavingCreator.createAccount(owner, 100);
+        BankAccount bankAccount = combinedCurrentCreator.createAccount(owner, 2000);
         BankAccount businessAccount = businessAccountFactory.createAccount(owner, 1000);
         CreditCard creditCard = creditCardFactory.createCreditCard(owner, 500);
 

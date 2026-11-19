@@ -8,8 +8,6 @@ import transfers.AccountTransferService;
 import transfers.TransferLoggerService;
 import transfers.TransferService;
 
-// Kontejner = "sklad" hotovych sluzeb.
-// Sam nic nevytvari, jen drzi sluzby, ktere mu da ContainerFactory.
 public class Container {
 
     private final TransferLoggerService transferLoggerService;

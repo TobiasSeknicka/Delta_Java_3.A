@@ -19,7 +19,6 @@ import transfers.AccountTransferService;
 import transfers.TransferLoggerService;
 import transfers.TransferService;
 
-// Tady (a jen tady) se vytvari vsechny sluzby a propojuji se pres konstruktory.
 public class ContainerFactory {
 
     public Container create() {
@@ -70,7 +69,6 @@ public class ContainerFactory {
         );
     }
 
-    // logovani obaluje mereni casu
     private <T extends BankAccount> AccountCreator<T> decorate(AccountCreator<T> creator) {
         return new LoggingAccountCreator<>(new TimedAccountCreator<>(creator));
     }

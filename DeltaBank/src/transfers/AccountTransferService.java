@@ -3,22 +3,25 @@ package transfers;
 import accounts.BankAccount;
 import accounts.BusinessAccount;
 import factories.TransactionFactory;
-import notifiers.ConsoleNotifier;
 import notifiers.Notifier;
 
 public class AccountTransferService {
 
     private static final double BUSINESS_ACCOUNT_TRANSFER_FEE = 0.003;
 
-    Notifier notifier = new ConsoleNotifier();
+    private final Notifier notifier;
+    private final TransferLoggerService logger;
+    private final TransferService transferService;
+    private final TransactionFactory transactionFactory;
 
-    private TransferLoggerService logger;
-    private TransferService transferService;
-    private TransactionFactory transactionFactory = new TransactionFactory();
-
-    public AccountTransferService(TransferLoggerService logger) {
+    public AccountTransferService(TransferLoggerService logger,
+                                  TransferService transferService,
+                                  Notifier notifier,
+                                  TransactionFactory transactionFactory) {
         this.logger = logger;
-        this.transferService = new TransferService(logger);
+        this.transferService = transferService;
+        this.notifier = notifier;
+        this.transactionFactory = transactionFactory;
     }
 
     public void transfer(BankAccount from, BankAccount to, double amount) {

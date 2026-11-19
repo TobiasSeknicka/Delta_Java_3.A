@@ -3,6 +3,8 @@ package transfers;
 import accounts.BusinessAccount;
 import accounts.CurrentAccount;
 import accounts.StudentAccount;
+import factories.TransactionFactory;
+import notifiers.ConsoleNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import people.Owner;
@@ -17,7 +19,7 @@ class TransferServiceTest {
 
     @BeforeEach
     public void setUp() {
-        transferService = new TransferService(new TransferLoggerService());
+        transferService = new TransferService(new TransferLoggerService(), new ConsoleNotifier(), new TransactionFactory());
         owner = new Owner("Jan", "Novak");
     }
 

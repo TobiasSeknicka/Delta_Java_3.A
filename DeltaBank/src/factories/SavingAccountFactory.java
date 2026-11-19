@@ -6,7 +6,12 @@ import people.Owner;
 
 public class SavingAccountFactory {
 
-    AccountNumberGenerator generator = new AccountNumberGenerator();
+    private final AccountNumberGenerator generator;
+
+    public SavingAccountFactory(AccountNumberGenerator generator) {
+        this.generator = generator;
+    }
+
     public SavingAccount createAccount(Owner owner, double balance) {
         SavingAccount savingAccount = new SavingAccount(owner, balance);
         savingAccount.setAccountNumber(generator.generateAccountNumber());

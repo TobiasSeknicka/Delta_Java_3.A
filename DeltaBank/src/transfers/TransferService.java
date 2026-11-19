@@ -4,7 +4,6 @@ import accounts.BusinessAccount;
 import accounts.SavingAccount;
 import accounts.StudentAccount;
 import factories.TransactionFactory;
-import notifiers.ConsoleNotifier;
 import notifiers.Notifier;
 
 public class TransferService {
@@ -13,13 +12,14 @@ public class TransferService {
     private static final double SAVING_ACCOUNT_ADD_BONUS = 0.005;      // 0,5 % pri vkladu
     private static final double STUDENT_ACCOUNT_LIMIT = -5000;
 
-    Notifier notifier = new ConsoleNotifier();
+    private final Notifier notifier;
+    private final TransferLoggerService logger;
+    private final TransactionFactory transactionFactory;
 
-    private TransferLoggerService logger;
-    private TransactionFactory transactionFactory = new TransactionFactory();
-
-    public TransferService(TransferLoggerService logger) {
+    public TransferService(TransferLoggerService logger, Notifier notifier, TransactionFactory transactionFactory) {
         this.logger = logger;
+        this.notifier = notifier;
+        this.transactionFactory = transactionFactory;
     }
 
     public void withdraw(Withdraw withdrawObject, double amount) {

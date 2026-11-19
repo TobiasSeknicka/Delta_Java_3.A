@@ -7,7 +7,15 @@ import transactions.Transaction;
 import transfers.AccountTransferService;
 import transfers.TransferLoggerService;
 import transfers.TransferService;
-import factories.logging.*;
+import accounts.services.AccountService;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.gson.Gson;
+import factories.logging.AccountCreator;
+import factories.logging.LoggingAccountCreator;
+import factories.logging.TimedAccountCreator;
+import generators.AccountNumberGenerator;
+import notifiers.ConsoleNotifier;
+import notifiers.Notifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,48 +26,42 @@ public class Main {
 
     public static void main(String[] args) {
 
+        //dependency injection
+        Notifier notifier = new ConsoleNotifier();
+        TransactionFactory transactionFactory = new TransactionFactory();
         TransferLoggerService logger = new TransferLoggerService();
 
-        TransferService transferService = new TransferService(logger);
-        AccountTransferService accountTransferService = new AccountTransferService(logger);
+        TransferService transferService = new TransferService(logger, notifier, transactionFactory);
+        AccountTransferService accountTransferService =
+                new AccountTransferService(logger, transferService, notifier, transactionFactory);
 
-        List<BankAccount> accounts = new ArrayList<>();
+        AccountNumberGenerator accountNumberGenerator = new AccountNumberGenerator();
+        CurrentAccountFactory currentAccountFactory = new CurrentAccountFactory(accountNumberGenerator);
+        StudentAccountFactory studentAccountFactory = new StudentAccountFactory(accountNumberGenerator);
+        SavingAccountFactory savingAccountFactory = new SavingAccountFactory(accountNumberGenerator);
+        BusinessAccountFactory businessAccountFactory = new BusinessAccountFactory(accountNumberGenerator);
+
+        AccountService accountService = new AccountService(
+                decorate(currentAccountFactory::createAccount),
+                decorate(studentAccountFactory::createAccount),
+                decorate(savingAccountFactory::createAccount),
+                decorate(businessAccountFactory::createAccount)
+        );
 
         OwnerFactory ownerFactory = new OwnerFactory();
-        CurrentAccountFactory currentAccountFactory = new CurrentAccountFactory();
-        StudentAccountFactory studentAccountFactory = new StudentAccountFactory();
-        SavingAccountFactory savingAccountFactory = new SavingAccountFactory();
-        BusinessAccountFactory businessAccountFactory = new BusinessAccountFactory();
         CreditCardFactory creditCardFactory = new CreditCardFactory();
+
+        BankAccountSerializeFactory bankAccountSerializeFactory = new BankAccountSerializeFactory();
 
         Owner owner = ownerFactory.createOwner("Tobias", "Seknicka");
 
-        /*BankAccount bankAccount = currentAccountFactory.createAccount(owner, 2000);
-        BankAccount studentAccount = studentAccountFactory.createAccount(owner, 100);
-        BankAccount savingAccount = savingAccountFactory.createAccount(owner, 100);*/
-        //jen logovani
-        AccountCreator<StudentAccount> loggedStudentCreator =
-                new LoggingAccountCreator<>(studentAccountFactory::createAccount);
-
-        // jen cas
-        AccountCreator<SavingAccount> timedSavingCreator =
-                new TimedAccountCreator<>(savingAccountFactory::createAccount);
-
-        //kombinace (logovani obaluje cas)
-        AccountCreator<CurrentAccount> combinedCurrentCreator =
-                new LoggingAccountCreator<>(
-                        new TimedAccountCreator<>(currentAccountFactory::createAccount));
-
-        BankAccount studentAccount = loggedStudentCreator.createAccount(owner, 100);
-        BankAccount savingAccount = timedSavingCreator.createAccount(owner, 100);
-        BankAccount bankAccount = combinedCurrentCreator.createAccount(owner, 2000);
-        BankAccount businessAccount = businessAccountFactory.createAccount(owner, 1000);
+        BankAccount bankAccount = accountService.createCurrentAccount(owner, 2000);
+        BankAccount studentAccount = accountService.createStudentAccount(owner, 100);
+        BankAccount savingAccount = accountService.createSavingAccount(owner, 100);
+        BankAccount businessAccount = accountService.createBusinessAccount(owner, 1000);
         CreditCard creditCard = creditCardFactory.createCreditCard(owner, 500);
 
-        accounts.add(bankAccount);
-        accounts.add(studentAccount);
-        accounts.add(savingAccount);
-        accounts.add(businessAccount);
+        List<BankAccount> accounts = accountService.getAccounts();
 
         for (BankAccount account : accounts) {
             if (account instanceof InterestPoint) {
@@ -126,8 +128,8 @@ public class Main {
         }
 
         List<BankAccountSerializationService> serializers = new ArrayList<>();
-        serializers.add(new BankAccountGsonSerializationService());
-        serializers.add(new BankAccountJacksonXmlSerializationService());
+        serializers.add(new BankAccountGsonSerializationService(bankAccountSerializeFactory, new Gson()));
+        serializers.add(new BankAccountJacksonXmlSerializationService(bankAccountSerializeFactory, new XmlMapper()));
 
         for (BankAccountSerializationService serializer : serializers) {
             System.out.println("=== " + serializer.getClass().getSimpleName() + " ===");
@@ -135,5 +137,10 @@ public class Main {
             System.out.println(serializer.serializeAll(accounts));
         }
 
+    }
+
+    // logovani obaluje mereni casu
+    private static <T extends BankAccount> AccountCreator<T> decorate(AccountCreator<T> creator) {
+        return new LoggingAccountCreator<>(new TimedAccountCreator<>(creator));
     }
 }

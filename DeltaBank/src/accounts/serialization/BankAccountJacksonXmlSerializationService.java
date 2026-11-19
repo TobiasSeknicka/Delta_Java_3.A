@@ -9,8 +9,13 @@ import java.util.List;
 
 public class BankAccountJacksonXmlSerializationService implements BankAccountSerializationService {
 
-    BankAccountSerializeFactory bankAccountSerializeFactory = new BankAccountSerializeFactory();
-    XmlMapper xmlMapper = new XmlMapper();
+    private final BankAccountSerializeFactory bankAccountSerializeFactory;
+    private final XmlMapper xmlMapper;
+
+    public BankAccountJacksonXmlSerializationService(BankAccountSerializeFactory bankAccountSerializeFactory, XmlMapper xmlMapper) {
+        this.bankAccountSerializeFactory = bankAccountSerializeFactory;
+        this.xmlMapper = xmlMapper;
+    }
 
     @Override
     public String serializeAll(List<BankAccount> bankAccounts) {

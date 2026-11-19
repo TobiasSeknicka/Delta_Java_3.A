@@ -8,14 +8,8 @@ import transfers.AccountTransferService;
 import transfers.TransferLoggerService;
 import transfers.TransferService;
 import accounts.services.AccountService;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.google.gson.Gson;
-import factories.logging.AccountCreator;
-import factories.logging.LoggingAccountCreator;
-import factories.logging.TimedAccountCreator;
-import generators.AccountNumberGenerator;
-import notifiers.ConsoleNotifier;
-import notifiers.Notifier;
+import di.Container;
+import di.ContainerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,32 +20,15 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //dependency injection
-        Notifier notifier = new ConsoleNotifier();
-        TransactionFactory transactionFactory = new TransactionFactory();
-        TransferLoggerService logger = new TransferLoggerService();
+        // vsechno se vytvori a propoji v ContainerFactory
+        Container container = new ContainerFactory().create();
 
-        TransferService transferService = new TransferService(logger, notifier, transactionFactory);
-        AccountTransferService accountTransferService =
-                new AccountTransferService(logger, transferService, notifier, transactionFactory);
-
-        AccountNumberGenerator accountNumberGenerator = new AccountNumberGenerator();
-        CurrentAccountFactory currentAccountFactory = new CurrentAccountFactory(accountNumberGenerator);
-        StudentAccountFactory studentAccountFactory = new StudentAccountFactory(accountNumberGenerator);
-        SavingAccountFactory savingAccountFactory = new SavingAccountFactory(accountNumberGenerator);
-        BusinessAccountFactory businessAccountFactory = new BusinessAccountFactory(accountNumberGenerator);
-
-        AccountService accountService = new AccountService(
-                decorate(currentAccountFactory::createAccount),
-                decorate(studentAccountFactory::createAccount),
-                decorate(savingAccountFactory::createAccount),
-                decorate(businessAccountFactory::createAccount)
-        );
-
-        OwnerFactory ownerFactory = new OwnerFactory();
-        CreditCardFactory creditCardFactory = new CreditCardFactory();
-
-        BankAccountSerializeFactory bankAccountSerializeFactory = new BankAccountSerializeFactory();
+        TransferLoggerService logger = container.getTransferLoggerService();
+        TransferService transferService = container.getTransferService();
+        AccountTransferService accountTransferService = container.getAccountTransferService();
+        AccountService accountService = container.getAccountService();
+        OwnerFactory ownerFactory = container.getOwnerFactory();
+        CreditCardFactory creditCardFactory = container.getCreditCardFactory();
 
         Owner owner = ownerFactory.createOwner("Tobias", "Seknicka");
 
@@ -128,8 +105,8 @@ public class Main {
         }
 
         List<BankAccountSerializationService> serializers = new ArrayList<>();
-        serializers.add(new BankAccountGsonSerializationService(bankAccountSerializeFactory, new Gson()));
-        serializers.add(new BankAccountJacksonXmlSerializationService(bankAccountSerializeFactory, new XmlMapper()));
+        serializers.add(container.getGsonSerializationService());
+        serializers.add(container.getJacksonXmlSerializationService());
 
         for (BankAccountSerializationService serializer : serializers) {
             System.out.println("=== " + serializer.getClass().getSimpleName() + " ===");
@@ -137,10 +114,5 @@ public class Main {
             System.out.println(serializer.serializeAll(accounts));
         }
 
-    }
-
-    // logovani obaluje mereni casu
-    private static <T extends BankAccount> AccountCreator<T> decorate(AccountCreator<T> creator) {
-        return new LoggingAccountCreator<>(new TimedAccountCreator<>(creator));
     }
 }

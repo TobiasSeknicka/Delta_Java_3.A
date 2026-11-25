@@ -15,6 +15,12 @@ public abstract class BankAccount implements Withdraw {
 
     protected double balance;
 
+    // mena uctu, vychozi je CZK
+    private String currency = "CZK";
+
+    // kurz: 1 EUR = 25 CZK
+    private static final double EUR_TO_CZK = 25;
+
     protected Notifier notifier = new EmailNotifier();
 
     public BankAccount(String uuid, String accountNumber, Owner owner) {
@@ -44,6 +50,22 @@ public abstract class BankAccount implements Withdraw {
 
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    // vrati zustatek prepocteny do druhe meny (CZK -> EUR, EUR -> CZK)
+    public String getBalanceConverted() {
+        if (currency.equals("CZK")) {
+            return (balance / EUR_TO_CZK) + " EUR";
+        }
+        return (balance * EUR_TO_CZK) + " CZK";
     }
 
     @Override

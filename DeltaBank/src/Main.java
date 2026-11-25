@@ -85,10 +85,17 @@ public class Main {
             System.out.println("Error: " + e.getMessage());
         }
 
-        System.out.println("current balance: " + bankAccount.getBalance());
-        System.out.println("saving balance: " + savingAccount.getBalance());
-        System.out.println("business balance: " + businessAccount.getBalance());
-        System.out.println("student balance: " + studentAccount.getBalance());
+        // business ucet vedeme v EUR, ostatni zustanou v CZK
+        businessAccount.setCurrency("EUR");
+
+        System.out.println("current balance: " + bankAccount.getBalance() + " " + bankAccount.getCurrency()
+                + " (" + bankAccount.getBalanceConverted() + ")");
+        System.out.println("saving balance: " + savingAccount.getBalance() + " " + savingAccount.getCurrency()
+                + " (" + savingAccount.getBalanceConverted() + ")");
+        System.out.println("business balance: " + businessAccount.getBalance() + " " + businessAccount.getCurrency()
+                + " (" + businessAccount.getBalanceConverted() + ")");
+        System.out.println("student balance: " + studentAccount.getBalance() + " " + studentAccount.getCurrency()
+                + " (" + studentAccount.getBalanceConverted() + ")");
         System.out.println("credit card balance: " + creditCard.getBalance());
 
         System.out.println("current number: " + bankAccount.getAccountNumber());
